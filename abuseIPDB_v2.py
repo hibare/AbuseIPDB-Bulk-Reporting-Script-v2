@@ -5,25 +5,35 @@
 """
 
 __author__ = "Shubham Hibare"
-__version__ = "1.0"
+__version__ = "2.0"
 __maintainer__ = "Shubham Hibare"
 __email__ = "shubham@hibare.in"
 
 import requests
-import json
 import csv
 import sys
 import os
 import argparse
 import ipaddress
-import time
 import datetime
 import string
 import random
+import json
+
+
+# global variabled
+steps = 5000
+tempDir = 'temp/'
 
 # generate filename
-def filenameGenerator(size=6, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
-    return ''.join(random.choice(chars) for _ in range(size))+".csv"
+def filenameGenerator(size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
+	"""
+		Description: generate randon filename with .csv extension
+		Input: size (optional), chars (opional)
+		Return: filename
+	"""
+	return ''.join(random.choice(chars) for _ in range(size))+".csv"
+
 
 # function to validate an IP address
 def validateIP(ipaddressToValidate):
@@ -38,22 +48,24 @@ def validateIP(ipaddressToValidate):
 	except Exception as e:
 		return False
 
-def prepData(APIKey, inputFileName, category, comment):
+
+# function to prepare data
+def prepData(inputFileName, category, comment):
 	"""
-		Description: post IPs to abuseIPDB
-		Input: APIKey 		 - abuseIPDB API key (string)
-			   inputFileName - input file containing IPs, one per line (string)
+		Description: prepates data to submit 
+		Input: inputFileName - input file containing IPs, one per line (string)
 			   category 	 - IP submission category (string)
 			   comment 	 - comment for IP (string)
-		Return: none
+		Return: status and filenames list
 	"""
+	global steps
+	global tempDir
+
 	inputIPList = []
 	validIPs = []
 	invalidIPs = []
 	fileNames = []
 	fields = ['IP','Categories','ReportDate','Comment']
-	step = 5
-	tempDir = 'temp/'
 	
 	reportedDate = datetime.datetime.now().isoformat()
 
@@ -82,9 +94,9 @@ def prepData(APIKey, inputFileName, category, comment):
 				else:
 					invalidIPs.append(ip)
 					
-		for index in range(0, len(validIPs), step):
+		for index in range(0, len(validIPs), steps):
             # get chunk of IPs
-			ipsList = validIPs[index:index+step]
+			ipsList = validIPs[index:index+steps]
 
 			try:
 				# generate filename
@@ -102,15 +114,72 @@ def prepData(APIKey, inputFileName, category, comment):
 					writer.writerow({'IP': str(ip), 'Categories': str(category), 'ReportDate': str(reportedDate), 'Comment': str(comment)})
 			
 			except Exception as e:
-				print("Exception: "+str(e))
+				print("[!] Exception: "+str(e))
 
 			finally:
 				fileHandler.close()
-		print(fileNames)
+		
+		# print invalid IPs
+		if len(invalidIPs) > 0:
+			print("\n[!] Invalid IPs")
+			for ip in invalidIPs:
+				print(ip)
+
+		return True, fileNames
 	except Exception as e:
-		print("Exception : "+str(e))
+		return False, str(e)
+
+# function to submit data
+def submitData(filename, APIKey):
+	"""
+		Description: Submit prepared data to AbuseIPDB API endpoint
+		Input: filname having prepared data and API key
+		Return: None
+	"""
+	headers = {
+		'Key': APIKey,
+		'Accept': 'application/json',
+	}
+
+	files = {
+		'csv': (filename, open(filename, 'rb')),
+	}
+
+	try:
+
+		response = requests.post('https://api.abuseipdb.com/api/v2/bulk-report', headers=headers, files=files)
+
+		resposeData = json.loads(response.text)
+		
+		if response.status_code == 200:
+
+			if "errors" in resposeData.keys():
+				print("\n[!] Error in processing file {}".format(filename))
+
+			elif "data" in resposeData.keys():
+				print("\n[!] Processed file {}".format(filename))
+				print("Saved reports: {}".format(resposeData.get('data').get('savedReports')))
+
+				errors = resposeData.get('data').get('invalidReports')
+
+				if len(errors) > 0:
+					print("[!] Error occurred for following IPs")
+					for errorData in errors:
+						print("{} - {}".format(errorData.get('input'), errorData.get('error')))
+		
+		else:
+			print("\n[!] Error in request ... ")
+			errors = resposeData.get('errors')
+			for error in errors:
+				print("{}".format(error.get('detail')))
+
+	except Exception as e:
+		print("[!] Exception: {}".format(e))
+
 
 if __name__ == '__main__':
+	# global tempDir
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-k', '--APIKey', type=str, metavar='<AbuseIPDB API key>', help='Enter AbuseIPDB API key', required=True)
 	parser.add_argument('-f', '--inputfilename', type=str, metavar='<input filename>', help='Input file name', required=True)
@@ -146,7 +215,7 @@ if __name__ == '__main__':
 		for key, value in reportingCategories.items():
 			print("{0} -> {1}".format(key,value))
 
-		category = input('Enter category separated by comma [ex: 18,22]: ')
+		category = input('\nEnter category separated by comma [ex: 18,22]: ')
 
 		#validate input categories
 		splitCategory = category.split(",")
@@ -157,7 +226,6 @@ if __name__ == '__main__':
 				print("Invalid category: {0}".format(cat))
 				sys.exit()
 
-
 		# read comment
 		comment = input('\nEnter comment: ')
 
@@ -167,10 +235,35 @@ if __name__ == '__main__':
 		proced = input("\nContinue [y/n]? ")
 
 		if proced == "y":
-			# call getIPDetails function
-			prepData(args.APIKey, args.inputfilename, category, comment)
+			print("")
+			# prep data 
+			status, data = prepData(args.inputfilename, category, comment)
+			
+			if status:
+
+				# check for data
+				if len(data) > 0:
+					# save current directory and change to temp directory
+					cwd = os.getcwd()
+					os.chdir(tempDir)
+
+					try:
+						# submit data
+						for filename in data:
+							submitData(filename, args.APIKey)
+					except Exception as e:
+						print("[!] Exception: {}".format(e))
+					
+					finally:
+						os.chdir(cwd)
+				else:
+					print("\n[!] Nothing to submit")
+
+			else:
+				print("[!] Error: {}".format(data))
+
 		else:
 			print("abort")
 	else:
-		print("Error : either the file [{0}] does not exists or is not readable".format(args.inputfilename))
+		print("[!] Error : either the file [{0}] does not exists or is not readable".format(args.inputfilename))
 	
