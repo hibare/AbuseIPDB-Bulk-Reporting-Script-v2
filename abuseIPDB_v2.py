@@ -22,7 +22,7 @@ import json
 
 
 # global variabled
-steps = 5000
+steps = 100
 tempDir = 'temp/'
 
 # generate filename
