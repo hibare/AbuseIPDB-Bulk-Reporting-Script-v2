@@ -17,7 +17,7 @@ To use AbuseIPDB reporting API, you need an APIv2 key. Get it by creating an acc
 - Create a input file with all IP addresses one per line.
 - Use following command to run script.
 ```
-python3 abuseIPDB.py -k <AabuseIPDB APIv2 key> -f <input filename>
+python3 abuseIPDB_v2.py -k <AabuseIPDB APIv2 key> -f <input filename>
 ```
 both options are required.
 - Use -h option for help.
