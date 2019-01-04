@@ -146,11 +146,12 @@ def submitData(filename, APIKey):
 	}
 
 	try:
+		print("\n[i] Processing file: {}".format(filename))
 
 		response = requests.post('https://api.abuseipdb.com/api/v2/bulk-report', headers=headers, files=files)
 
+		print(response.text)
 		resposeData = json.loads(response.text)
-		
 		if response.status_code == 200:
 
 			if "errors" in resposeData.keys():
