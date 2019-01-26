@@ -152,6 +152,7 @@ def submitData(filename, APIKey):
 
 		print(response.text)
 		resposeData = json.loads(response.text)
+		
 		if response.status_code == 200:
 
 			if "errors" in resposeData.keys():
