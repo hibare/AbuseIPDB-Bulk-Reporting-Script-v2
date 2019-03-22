@@ -22,7 +22,7 @@ import json
 
 
 # global variabled
-steps = 100
+steps = 1000
 tempDir = 'temp/'
 
 # generate filename
@@ -150,7 +150,6 @@ def submitData(filename, APIKey):
 
 		response = requests.post('https://api.abuseipdb.com/api/v2/bulk-report', headers=headers, files=files)
 
-		print(response.text)
 		resposeData = json.loads(response.text)
 		
 		if response.status_code == 200:
@@ -253,6 +252,7 @@ if __name__ == '__main__':
 						# submit data
 						for filename in data:
 							submitData(filename, args.APIKey)
+					
 					except Exception as e:
 						print("[!] Exception: {}".format(e))
 					
