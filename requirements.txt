@@ -4,15 +4,13 @@
 #
 #    pip-compile
 #
---trusted-host pypi.org
-
 certifi==2018.11.29
     # via requests
 chardet==3.0.4
     # via requests
 idna==2.8
     # via requests
-ipaddress==1.0.22
+ipaddress==1.0.23
     # via -r requirements.in
 requests==2.21.0
     # via -r requirements.in
