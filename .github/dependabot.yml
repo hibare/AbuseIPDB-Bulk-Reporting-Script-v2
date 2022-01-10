@@ -5,9 +5,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "dev"
 
   # Maintain dependencies for Go mods
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "dev"
