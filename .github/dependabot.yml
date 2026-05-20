@@ -1,19 +1,18 @@
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "main"
-    assignees:
-      - "hibare"
-
-  # Maintain dependencies for Go mods
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "main"
-    assignees:
-      - "hibare"
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: daily
+  target-branch: main
+  assignees:
+  - hibare
+  cooldown-period: 10
+- package-ecosystem: pip
+  directory: /
+  schedule:
+    interval: daily
+  target-branch: main
+  assignees:
+  - hibare
+  cooldown-period: 10
