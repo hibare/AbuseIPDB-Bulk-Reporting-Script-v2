@@ -17,3 +17,18 @@ updates:
     target-branch: "main"
     assignees:
       - "hibare"
+
+    # Maintain dependencies for pre-commit
+    - package-ecosystem: "pre-commit"
+      directory: "/"
+      schedule:
+          interval: "monthly"
+          day: "friday"
+          time: "00:30"
+      target-branch: "main"
+      assignees:
+          - "hibare"
+      groups:
+          pre-commit:
+              patterns:
+                  - "*"
