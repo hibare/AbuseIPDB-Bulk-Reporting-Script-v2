@@ -12,6 +12,14 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-illegal-windows-names
+      - id: fix-byte-order-marker
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: debug-statements
 
   - repo: https://github.com/psf/black
     rev: 26.5.1
@@ -33,3 +41,22 @@ repos:
     rev: 7.3.0
     hooks:
       - id: flake8
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 38bfb07c0c64c304f47eb52090f8288150c77730 # v0.17.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+        types: [python]
+      - id: ruff-format
+        types: [python]
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: 341e2a331ba578029e66c2e01183e7a6b5ca9ab4 # v0.24.0
+    hooks:
+      - id: markdownlint-cli2-docker
