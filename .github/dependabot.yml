@@ -1,31 +1,53 @@
+# Managed by Axon; manual edits will be overwritten.
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "friday"
+      time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
+    cooldown:
+      default-days: 5
     assignees:
       - "hibare"
+    groups:
+      actions:
+        patterns:
+          - "*"
 
-  # Maintain dependencies for Go mods
+  # Maintain dependencies for Python
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "friday"
+      time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
+    cooldown:
+      default-days: 5
     assignees:
       - "hibare"
+    groups:
+      python:
+        patterns:
+          - "*"
 
   # Maintain dependencies for pre-commit
   - package-ecosystem: "pre-commit"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
+    cooldown:
+      default-days: 5
     assignees:
       - "hibare"
     groups:
